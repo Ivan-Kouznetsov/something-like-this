@@ -5,9 +5,8 @@ Most automated tests are procedural – they contain a set of steps for how to tes
     const result = await expect('https://jsonplaceholder.typicode.com/todos/1')
         .toMatch({
             '$..userId': when.each.is.number,
-            '$..id': when.each.is.number,
             '$..title': when.each.is.string,
-            '$..id': when.each.is.greaterThan(0)
+            '$..id': when.array.smallestNumberIs(0)
         });  
 
 Without having ever used this library you can probably guess what this does. The rules consist of key-value pairs, wherein the key is a [JSON path](https://support.smartbear.com/alertsite/docs/monitors/api/endpoint/jsonpath.html) and the value is a callback or literal value.
