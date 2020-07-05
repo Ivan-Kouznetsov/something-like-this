@@ -1,5 +1,5 @@
 # something-like-this
-## A declarative server API testing library.
+## A declarative server API testing library
 Most automated tests are procedural – they contain a set of steps for how to test something, leaving room for bugs, this project aims to extract all logic and procedural code from the test and put it into the library which allows you to write API tests that contain only HTTP request data and a human-readable set of rules for what the response should be. Such as:
 
     const result = await expect('https://jsonplaceholder.typicode.com/todos/1')
