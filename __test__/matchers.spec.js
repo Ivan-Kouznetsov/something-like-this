@@ -5,7 +5,7 @@ describe('Matchers tests', () => {
         expect(when.each.is.number(NaN)).toBe(false);
         expect(when.each.is.number(1 / 0)).toBe(false);
         expect(when.each.is.number(-1 / 0)).toBe(false);
-        expect(when.each.is.number("12")).toBe(false);
+        expect(when.each.is.number('12')).toBe(false);
         expect(when.each.is.number(null)).toBe(false);
         expect(when.each.is.number(10)).toBe(true);
     });
@@ -20,7 +20,7 @@ describe('Matchers tests', () => {
         expect(when.each.is.greaterThan(10)(11)).toBe(true);
         expect(when.each.is.lessThan(10)(9)).toBe(true);
         expect(when.each.is.object({})).toBe(true);
-        expect(when.each.is.string("")).toBe(true);        
+        expect(when.each.is.string('')).toBe(true);        
         expect(when.each.is.truthy(1)).toBe(true);
         
     });
@@ -33,20 +33,20 @@ describe('Matchers tests', () => {
         expect(when.each.is.greaterThan(10)(null)).toBe(false);
         expect(when.each.is.lessThan(10)(null)).toBe(false);
         expect(when.each.is.string(null)).toBe(false);
-        expect(when.each.is.stringContaining("hello")(null)).toBe(false);
+        expect(when.each.is.stringContaining('hello')(null)).toBe(false);
         expect(when.each.is.truthy(null)).toBe(false);
     });
 
     it('should correctly match strings', () => {
-        expect(when.each.is.nonEmptyString("hello")).toBe(true);
-        expect(when.each.is.nonEmptyString("")).toBe(false);
+        expect(when.each.is.nonEmptyString('hello')).toBe(true);
+        expect(when.each.is.nonEmptyString('')).toBe(false);
         expect(when.each.is.nonEmptyString(null)).toBe(false);
-        expect(when.each.is.stringContaining("hello")("hello world")).toBe(true);
+        expect(when.each.is.stringContaining('hello')('hello world')).toBe(true);
     });
 
     it('should correctly match using not', () => {
-        expect(when.each.is.not("")("not an empty string")).toBe(true);
-        expect(when.each.is.not("")("")).toBe(false);
+        expect(when.each.is.not('')('not an empty string')).toBe(true);
+        expect(when.each.is.not('')('')).toBe(false);
         expect(when.each.is.not(NaN)(NaN)).toBe(false);
     });
 

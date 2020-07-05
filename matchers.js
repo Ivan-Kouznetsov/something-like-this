@@ -56,7 +56,7 @@ module.exports = {
                 }
                 return numList.indexOf(minNumber) !== -1;
             }
-            checkMin["isForArrays"] = true;
+            checkMin['isForArrays'] = true;
             return checkMin;
         },
         largestNumberIs: maxNumber => {
@@ -66,17 +66,17 @@ module.exports = {
                 }
                 return numList.indexOf(maxNumber) !== -1;
             }
-            checkMax["isForArrays"] = true;
+            checkMax['isForArrays'] = true;
             return checkMax;
         },
         has: comparisonValue => {
             function contains(input) { return input.indexOf(comparisonValue) !== -1; }
-            contains["isForArrays"] = true;
+            contains['isForArrays'] = true;
             return contains;
         },
         doesntHave: comparisonValue => {
             function contains(input) { return input.indexOf(comparisonValue) === -1; }
-            contains["isForArrays"] = true;
+            contains['isForArrays'] = true;
             return contains;
         }
     }
