@@ -1,6 +1,6 @@
 # something-like-this
 ## A declarative server API testing library
-Most automated tests are procedural – they contain a set of steps for how to test something, leaving room for bugs, this project aims to extract all logic and procedural code from the test and put it into the library which allows you to write API tests that contain only HTTP request data and a human-readable set of rules for what the response should be. Such as:
+Most automated tests are procedural â€“ they contain a set of steps for how to test something, leaving room for bugs, this project aims to extract all logic and procedural code from the test and put it into the library which allows you to write API tests that contain only HTTP request data and a human-readable set of rules for what the response should be. Such as:
 
     const result = await expect('https://jsonplaceholder.typicode.com/todos/1')
         .toMatch({
@@ -14,5 +14,15 @@ Without having ever used this library you can probably guess what this does. The
 * Declarative API tests
 * Easy to extend
 * 100% code coverage of the library itself
+
+File             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-----------------|---------|----------|---------|---------|-------------------
+All files        |     100 |      100 |     100 |     100 |
+ index.js        |     100 |      100 |     100 |     100 |
+ matchers.js     |     100 |      100 |     100 |     100 |
+ objectTester.js |     100 |      100 |     100 |     100 |
+
+
 ## Limitations
-HTTP API tests only
+* HTTP API tests only
+* One rule per JSON path
