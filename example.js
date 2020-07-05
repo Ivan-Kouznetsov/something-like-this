@@ -1,12 +1,13 @@
 const { after, expect, when } = require('./index');
 
 const runTests = async () => {
-    const result = await after('https://jsonplaceholder.typicode.com/todos',
-        { method: 'POST', body: 'a=1' }).expect('https://jsonplaceholder.typicode.com/todos/1')
+    const result = await after('https://jsonplaceholder.typicode.com/todos', { method: 'POST', body: "{userId:1,title:'hello'}" })
+        .expect('https://jsonplaceholder.typicode.com/todos/1')
         .toMatch({
-            '$..userId': when.each.is.number,        
-            '$..title': when.each.is.string
-        });
+            '$..userId': when.each.is.number,
+            '$..title': when.each.is.string,
+            '$..id': when.array.smallestNumberIs(1)
+        }); ;
     console.log('should return todos:');
     console.log(result);
 
@@ -26,4 +27,4 @@ const runTests = async () => {
 }
 
 
-runTests().then(() => { console.log('done') }).catch(e => {console.error(e)});
+runTests().then(() => { console.log('done') }).catch(e => { console.error(e) });
