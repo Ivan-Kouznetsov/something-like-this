@@ -1,8 +1,8 @@
 {
   "name": "something-like-this",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "something-like-this",
-  "main": "app.js",
+  "main": "index.js",
   "author": {
     "name": "Ivan Kouznetsov"
   },

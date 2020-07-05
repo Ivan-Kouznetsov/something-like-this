@@ -1,7 +1,8 @@
-const { expect, when } = require('./index');
+const { after, expect, when } = require('./index');
 
 const runTests = async () => {
-    const result = await expect('https://jsonplaceholder.typicode.com/todos/1')
+    const result = await after('https://jsonplaceholder.typicode.com/todos',
+        { method: 'POST', body: 'a=1' }).expect('https://jsonplaceholder.typicode.com/todos/1')
         .toMatch({
             '$..userId': when.each.is.number,        
             '$..title': when.each.is.string
