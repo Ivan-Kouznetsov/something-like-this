@@ -57,6 +57,16 @@ module.exports = {
           return typeof n === "number" && n < comparisonValue;
         };
       },
+      greaterThanOrEqual: (comparisonValue) => {
+        return (n) => {
+          return typeof n === "number" && n >= comparisonValue;
+        };
+      },
+      lessThanOrEqual: (comparisonValue) => {
+        return (n) => {
+          return typeof n === "number" && n <= comparisonValue;
+        };
+      },
       /*any in list*/
       anyOf: (list) => {
         return (item) => {

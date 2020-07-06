@@ -17,8 +17,6 @@ describe("Matchers tests", () => {
     expect(when.each.is.boolean(false)).toBe(true);
     expect(when.each.is.defined(1)).toBe(true);
     expect(when.each.is.falsy(0)).toBe(true);
-    expect(when.each.is.greaterThan(10)(11)).toBe(true);
-    expect(when.each.is.lessThan(10)(9)).toBe(true);
     expect(when.each.is.object({})).toBe(true);
     expect(when.each.is.string("")).toBe(true);
     expect(when.each.is.truthy(1)).toBe(true);
@@ -70,5 +68,22 @@ describe("Matchers tests", () => {
   it("should correctly match using regex", () => {
     expect(when.each.is.matchingRegex("\\d+")("123")).toBe(true);
     expect(when.each.is.matchingRegex("\\d+")("hello")).toBe(false);
+  });
+
+  it("should correctly match numbers", () => {
+    expect(when.each.is.greaterThan(10)(11)).toBe(true);
+    expect(when.each.is.lessThan(10)(9)).toBe(true);
+    expect(when.each.is.greaterThan(10)(9)).toBe(false);
+    expect(when.each.is.lessThan(10)(11)).toBe(false);
+
+    expect(when.each.is.greaterThanOrEqual(10)(11)).toBe(true);
+    expect(when.each.is.lessThanOrEqual(10)(9)).toBe(true);
+    expect(when.each.is.greaterThanOrEqual(10)(9)).toBe(false);
+    expect(when.each.is.lessThanOrEqual(10)(11)).toBe(false);
+
+    expect(when.each.is.greaterThanOrEqual(10)(10)).toBe(true);
+    expect(when.each.is.lessThanOrEqual(10)(10)).toBe(true);
+    expect(when.each.is.greaterThanOrEqual(10)(10)).toBe(true);
+    expect(when.each.is.lessThanOrEqual(10)(10)).toBe(true);
   });
 });
