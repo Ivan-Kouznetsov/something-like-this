@@ -27,24 +27,35 @@ describe("End to end tests", () => {
   });
 
   it("should pass on id", async () => {
-    const result = await after("https://jsonplaceholder.typicode.com/todos", {
-      method: "POST",
-      body: "a=1",
-    }, { passOn: "$..id", as: "NEW_ID" })
-      .expect("https://jsonplaceholder.typicode.com/todos/", { method:"post" })
+    const result = await after(
+      "https://jsonplaceholder.typicode.com/todos",
+      {
+        method: "POST",
+        body: "a=1",
+      },
+      { passOn: "$..id", as: "NEW_ID" }
+    )
+      .expect("https://jsonplaceholder.typicode.com/todos/", { method: "post" })
       .toMatch({
-            "$..id": when.each.is.number
+        "$..id": when.each.is.number,
       });
 
     expect(result.isMatch).toBe(true);
 
-    const result2 = await after("https://jsonplaceholder.typicode.com/todos", {
-      method: "POST",
-      body: "a=1",
-    }, { passOn: "$..id", as: "NEW_ID" })
-      .expect("https://jsonplaceholder.typicode.com/todos/", { method:"post", body:"a=NEW_ID" })
+    const result2 = await after(
+      "https://jsonplaceholder.typicode.com/todos",
+      {
+        method: "POST",
+        body: "a=1",
+      },
+      { passOn: "$..id", as: "NEW_ID" }
+    )
+      .expect("https://postman-echo.com/post", {
+        method: "post",
+        body: "a=NEW_ID",
+      })
       .toMatch({
-            "$..id": when.each.is.number
+        "$..data": when.each.is.stringContaining("a=201"),
       });
 
     expect(result2.isMatch).toBe(true);
