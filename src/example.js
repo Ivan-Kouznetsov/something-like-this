@@ -1,4 +1,5 @@
 const { after, expect, when } = require("./index");
+const { consoleReporter } = require("./reporters/console.reporter");
 
 const runTests = async () => {
   const result = await after("https://jsonplaceholder.typicode.com/todos", {
@@ -11,17 +12,21 @@ const runTests = async () => {
       "$..title": when.each.is.string,
       "$..id": when.each.is.greaterThanOrEqual(1),
     });
-  console.log("should return todos:");
-  console.log(result);
 
-  const result2 = await expect("https://jsonplaceholder.typicode.com/todos").toMatch({
+  consoleReporter(result, "should fetch todos");
+
+  const result2 = await expect(
+    "https://jsonplaceholder.typicode.com/todos"
+  ).toMatch({
     "$..id": when.each.is.greaterThanOrEqual(1),
   });
 
   console.log("ids should start at 1");
   console.log(result2);
 
-  const result3 = await expect("https://jsonplaceholder.typicode.com/todos/1").toMatch({ "$..title": "My title" });
+  const result3 = await expect(
+    "https://jsonplaceholder.typicode.com/todos/1"
+  ).toMatch({ "$..title": "My title" });
 
   console.log("title should be My Title");
   console.log(result3);
@@ -34,7 +39,8 @@ const runTests = async () => {
       "Upgrade-Insecure-Requests": "1",
       "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36",
-      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+      Accept:
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
       Connection: "keep-alive",
     },
   }).toMatch({
