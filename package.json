@@ -7,6 +7,8 @@
     "name": "Ivan Kouznetsov"
   },
   "devDependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
     "jest": "^26.1.0",
     "prettier": "2.0.5"
   },
@@ -15,7 +17,7 @@
     "node-fetch": "^2.6.0"
   },
   "scripts": {
-    "test": "jest",
+    "test": "echo Make sure the test server is running && jest",
     "test-cov": "jest --coverage",
     "prettierfix": "prettier --print-width 120 --write ."
   }
