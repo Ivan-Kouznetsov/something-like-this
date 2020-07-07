@@ -4,8 +4,15 @@ const matchers = require("./matchers");
 const jsonpath = require("jsonpath");
 
 const expectFactory = (arragePromise, pass) => {
-  return (url, options) => {
+  /**
+   * @param url {string}
+   * @param [options] {{method: string, body?: string}} Eg GET or POST
+   */
+  const expect = (url, options) => {
     return {
+      /**
+       * @param ruleSet {{jsonpath:string, matcher:(Function|any)}} jasonpath : callback or literal value
+       */ 
       toMatch: async (ruleSet) => {
         if (arragePromise) {
             const firstResponse = await (await arragePromise).json();
@@ -26,16 +33,24 @@ const expectFactory = (arragePromise, pass) => {
       },
     };
   };
+
+  return expect;
 };
 
 const expect = expectFactory(undefined, undefined);
 
 const something_like_this = {
+  /**
+   * @param url {string}
+   * @param [options] {{method: string, body?: string}} Eg GET or POST
+   * @param [pass] {{passOn: string, as: string}}
+   */ 
   after: (url, options, pass) => {
     return {
       expect: expectFactory(fetch(url, options), pass),
     };
   },
+  
   expect,
   when: matchers,
 };
