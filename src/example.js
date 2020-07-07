@@ -1,5 +1,6 @@
 const { after, expect, when } = require("./index");
 const { consoleReporter } = require("./reporters/console.reporter");
+const { mariadbReporter } = require("./reporters/mariadb.reporter");
 
 const runTests = async () => {
   const result = await after("https://jsonplaceholder.typicode.com/todos", {
@@ -20,6 +21,14 @@ const runTests = async () => {
   ).toMatch({
     "$..id": when.each.is.greaterThanOrEqual(1),
   });
+
+  /*
+  await mariadbReporter(
+    result2,
+    "ids should start at 1",
+    "USER_NAME",
+    "PASSWORD"
+  );*/
 
   console.log("ids should start at 1");
   console.log(result2);
@@ -56,6 +65,7 @@ const runTests = async () => {
 runTests()
   .then(() => {
     console.log("done");
+    process.exit(0);
   })
   .catch((e) => {
     console.error(e);

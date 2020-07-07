@@ -7,5 +7,7 @@ const consoleReporter = (testResult, testName) => {
     console.error("FAILED");
     console.log(testResult.failedRules);
   }
+
+  console.log(`DURATION(ms):${testResult.duration.toFixed(2)}`);
 };
 module.exports = { consoleReporter };

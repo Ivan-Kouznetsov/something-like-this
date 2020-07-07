@@ -3,6 +3,11 @@ const objectTester = require("./objectTester");
 const matchers = require("./matchers");
 const jsonpath = require("jsonpath");
 
+const getTimeInMs = () => {
+  const hrtime = process.hrtime();
+  return hrtime[0] * 1000 + hrtime[1] / 1000000;
+};
+
 const expectFactory = (arragePromise, pass) => {
   /**
    * @param url {string}
@@ -15,6 +20,7 @@ const expectFactory = (arragePromise, pass) => {
        */
 
       toMatch: async (ruleSet) => {
+        const start = getTimeInMs();
         if (arragePromise) {
           const firstResponse = await (await arragePromise).json();
           if (pass) {
@@ -30,7 +36,13 @@ const expectFactory = (arragePromise, pass) => {
 
         //do the match
         const failedRules = objectTester(ruleSet, await response.json());
-        return { isMatch: failedRules.length === 0, failedRules };
+
+        const end = getTimeInMs();
+        return {
+          isMatch: failedRules.length === 0,
+          failedRules,
+          duration: end - start,
+        };
       },
     };
   };
