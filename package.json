@@ -17,6 +17,7 @@
     "node-fetch": "^2.6.0"
   },
   "scripts": {
+    "test-server": "node src/__test__/server/testServer.js",
     "test": "echo Make sure the test server is running && jest",
     "test-cov": "jest --coverage",
     "prettierfix": "prettier --print-width 120 --write ."
