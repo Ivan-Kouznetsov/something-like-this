@@ -87,18 +87,18 @@ module.exports = {
   },
   array: {
     has: (comparisonValue) => {
-      function contains(input) {
+      function has(input) {
         return input.indexOf(comparisonValue) !== -1;
       }
-      contains["isForArrays"] = true;
-      return contains;
+      has["isForArrays"] = true;
+      return has;
     },
     doesntHave: (comparisonValue) => {
-      function contains(input) {
+      function doesntHave(input) {
         return input.indexOf(comparisonValue) === -1;
       }
-      contains["isForArrays"] = true;
-      return contains;
+      doesntHave["isForArrays"] = true;
+      return doesntHave;
     },
   },
 };
