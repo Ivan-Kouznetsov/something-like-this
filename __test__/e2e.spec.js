@@ -1,63 +1,64 @@
 const { after, expect: expectRequest, when } = require("../index");
 
+const port = 3000;
+const testServer = `http://localhost:${port}`;
+
 describe("End to end tests", () => {
-  it("should fetch todo after post", async () => {
-    const result = await after("https://jsonplaceholder.typicode.com/todos", {
-      method: "POST",
-      body: "a=1",
-    })
-      .expect("https://jsonplaceholder.typicode.com/todos/1")
-      .toMatch({
-        "$..userId": when.each.is.number,
-        "$..title": when.each.is.string,
-        "$..id": when.each.is.greaterThan(0),
-      });
+  const sampleText = "This is my post";
+
+  it("should fetch and match a post", async () => {
+    const result = await expectRequest(`${testServer}/posts/0`).toMatch({
+      "$..text": when.each.is.string,
+      "$..id": when.each.is.greaterThanOrEqual(0),
+    });
 
     expect(result.isMatch).toBe(true);
   });
 
-  it("should fetch todo", async () => {
-    const result = await expectRequest("https://jsonplaceholder.typicode.com/todos/1").toMatch({
-      "$..userId": when.each.is.number,
-      "$..title": when.each.is.string,
-      "$..id": when.each.is.greaterThan(0),
-    });
+  it("should fetch and match a post after posting", async () => {
+    const result = await after(`${testServer}/posts`, {
+      method: "POST",
+      body: sampleText,
+    })
+      .expect(`${testServer}/posts/0`)
+      .toMatch({
+        "$..text": when.each.is.string,
+      });
 
     expect(result.isMatch).toBe(true);
   });
 
   it("should pass on id", async () => {
     const result = await after(
-      "https://jsonplaceholder.typicode.com/todos",
+      `${testServer}/posts`,
       {
         method: "POST",
-        body: "a=1",
+        body: sampleText,
       },
       { passOn: "$..id", as: "NEW_ID" }
     )
-      .expect("https://jsonplaceholder.typicode.com/todos/", { method: "post" })
+      .expect(`${testServer}/posts/NEW_ID`)
       .toMatch({
-        "$..id": when.each.is.number,
+        "$..text": sampleText,
       });
 
     expect(result.isMatch).toBe(true);
+  });
 
-    const result2 = await after(
-      "https://jsonplaceholder.typicode.com/todos",
+  it("should pass on id when posting a body", async () => {
+    const result = await after(
+      `${testServer}/posts`,
       {
         method: "POST",
-        body: "a=1",
+        body: sampleText,
       },
       { passOn: "$..id", as: "NEW_ID" }
     )
-      .expect("https://postman-echo.com/post", {
-        method: "post",
-        body: "a=NEW_ID",
-      })
+      .expect(`${testServer}/mirror`, { method: "POST", body: "NEW_ID" })
       .toMatch({
-        "$..data": when.each.is.stringContaining("a=201"),
+        "$..requestBody": when.each.is.matchingRegex(/\d+/),
       });
 
-    expect(result2.isMatch).toBe(true);
+    expect(result.isMatch).toBe(true);
   });
 });
