@@ -17,6 +17,6 @@
   "scripts": {
     "test": "jest",
     "test-cov": "jest --coverage",
-    "prettierfix": "prettier --write ."
+    "prettierfix": "prettier --print-width 120 --write ."
   }
 }

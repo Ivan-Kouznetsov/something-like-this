@@ -17,9 +17,7 @@ describe("End to end tests", () => {
   });
 
   it("should fetch todo", async () => {
-    const result = await expectRequest(
-      "https://jsonplaceholder.typicode.com/todos/1"
-    ).toMatch({
+    const result = await expectRequest("https://jsonplaceholder.typicode.com/todos/1").toMatch({
       "$..userId": when.each.is.number,
       "$..title": when.each.is.string,
       "$..id": when.each.is.greaterThan(0),

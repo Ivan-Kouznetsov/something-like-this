@@ -54,15 +54,6 @@ describe("Matchers tests", () => {
 
     expect(when.array.doesntHave(1)(testArray)).toBe(false);
     expect(when.array.doesntHave(10)(testArray)).toBe(true);
-
-    expect(when.array.largestNumberIs(5)(testArray)).toBe(true);
-    expect(when.array.largestNumberIs(10)(testArray)).toBe(false);
-    expect(when.array.largestNumberIs(1)(testArray)).toBe(false);
-
-    expect(when.array.smallestNumberIs(5)(testArray)).toBe(false);
-    expect(when.array.smallestNumberIs(10)(testArray)).toBe(false);
-    expect(when.array.smallestNumberIs(0)(testArray)).toBe(false);
-    expect(when.array.smallestNumberIs(1)(testArray)).toBe(true);
   });
 
   it("should correctly match using regex", () => {

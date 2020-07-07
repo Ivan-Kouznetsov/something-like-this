@@ -88,12 +88,14 @@ describe("objectTester tests", () => {
   it("should check array values", () => {
     const failedRules = objectTester(
       {
-        "$..price": when.array.smallestNumberIs(8.95),
-        "$..expensive": when.array.smallestNumberIs(8.95),
+        "$..title": when.array.has("John Smith"),
+        "$..price": when.array.has(8.95),
+        "$..expensive": when.array.doesntHave(8.95),
       },
       bookStore
     );
 
     expect(failedRules.length).toBe(1);
+    expect(failedRules[0].path).toEqual("$..title");
   });
 });

@@ -37,10 +37,7 @@ module.exports = {
       /*strings*/
       stringContaining: (comparisonValue) => {
         return (input) => {
-          return (
-            typeof input === "string" &&
-            input.toLowerCase().indexOf(comparisonValue.toLowerCase()) !== -1
-          );
+          return typeof input === "string" && input.toLowerCase().indexOf(comparisonValue.toLowerCase()) !== -1;
         };
       },
       nonEmptyString: (input) => {
@@ -89,26 +86,6 @@ module.exports = {
     },
   },
   array: {
-    smallestNumberIs: (minNumber) => {
-      function checkMin(numList) {
-        for (const n of numList) {
-          if (n < minNumber) return false;
-        }
-        return numList.indexOf(minNumber) !== -1;
-      }
-      checkMin["isForArrays"] = true;
-      return checkMin;
-    },
-    largestNumberIs: (maxNumber) => {
-      function checkMax(numList) {
-        for (const n of numList) {
-          if (n > maxNumber) return false;
-        }
-        return numList.indexOf(maxNumber) !== -1;
-      }
-      checkMax["isForArrays"] = true;
-      return checkMax;
-    },
     has: (comparisonValue) => {
       function contains(input) {
         return input.indexOf(comparisonValue) !== -1;
