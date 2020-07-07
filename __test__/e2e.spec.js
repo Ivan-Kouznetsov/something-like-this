@@ -25,4 +25,28 @@ describe("End to end tests", () => {
 
     expect(result.isMatch).toBe(true);
   });
+
+  it("should pass on id", async () => {
+    const result = await after("https://jsonplaceholder.typicode.com/todos", {
+      method: "POST",
+      body: "a=1",
+    }, { passOn: "$..id", as: "NEW_ID" })
+      .expect("https://jsonplaceholder.typicode.com/todos/", { method:"post" })
+      .toMatch({
+            "$..id": when.each.is.number
+      });
+
+    expect(result.isMatch).toBe(true);
+
+    const result2 = await after("https://jsonplaceholder.typicode.com/todos", {
+      method: "POST",
+      body: "a=1",
+    }, { passOn: "$..id", as: "NEW_ID" })
+      .expect("https://jsonplaceholder.typicode.com/todos/", { method:"post", body:"a=NEW_ID" })
+      .toMatch({
+            "$..id": when.each.is.number
+      });
+
+    expect(result2.isMatch).toBe(true);
+  });
 });
