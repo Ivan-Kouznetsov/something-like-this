@@ -1,4 +1,4 @@
-const { after, expect: expectRequest, when } = require("../src/index");
+const { after, expect: expectRequest, when } = require("../index");
 
 const port = 3000;
 const testServer = `http://localhost:${port}`;

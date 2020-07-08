@@ -1,5 +1,5 @@
 const objectTester = require("../objectTester");
-const when = require("../matchers");
+const { when } = require("../matchers");
 
 describe("objectTester tests", () => {
   const bookStore = {
@@ -66,6 +66,9 @@ describe("objectTester tests", () => {
       {
         "$..color": "red",
         "$..nothing": undefined,
+        "$..nothing2": (a) => {
+          return a === undefined;
+        },
         "$..expensive": "10",
       },
       bookStore

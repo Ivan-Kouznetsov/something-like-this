@@ -18,7 +18,6 @@ const expectFactory = (arragePromise, pass) => {
       /**
        * @param ruleSet {{jsonpath:string, matcher:(Function|any)}} jasonpath : callback or literal value
        */
-
       toMatch: async (ruleSet) => {
         const start = getTimeInMs();
         if (arragePromise) {
@@ -66,7 +65,8 @@ const something_like_this = {
   },
 
   expect,
-  when: matchers,
+  when: matchers.when,
+  ifExists: matchers.ifExists,
 };
 
 module.exports = something_like_this;

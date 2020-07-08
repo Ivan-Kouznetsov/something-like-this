@@ -1,4 +1,4 @@
-module.exports = {
+const when = {
   each: {
     is: {
       /*types*/
@@ -26,7 +26,9 @@ module.exports = {
       defined: (comparisonValue) => {
         return typeof comparisonValue !== "undefined";
       },
-      undefined: undefined,
+      undefined: (comparisonValue) => {
+        return typeof comparisonValue === "undefined";
+      },
       /*true/false*/
       truthy: (comparisonValue) => {
         return !!comparisonValue;
@@ -37,7 +39,10 @@ module.exports = {
       /*strings*/
       stringContaining: (comparisonValue) => {
         return (input) => {
-          return typeof input === "string" && input.toLowerCase().indexOf(comparisonValue.toLowerCase()) !== -1;
+          return (
+            typeof input === "string" &&
+            input.toLowerCase().indexOf(comparisonValue.toLowerCase()) !== -1
+          );
         };
       },
       nonEmptyString: (input) => {
@@ -102,3 +107,5 @@ module.exports = {
     },
   },
 };
+
+module.exports = { when };

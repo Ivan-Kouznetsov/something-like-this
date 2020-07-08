@@ -7,7 +7,8 @@ const testObject = (ruleSet, obj) => {
     if (values.length > 0) {
       if (typeof ruleSet[path] === "function") {
         if (ruleSet[path].isForArrays) {
-          if (!ruleSet[path](values)) failedRules.push({ path, value: JSON.stringify(values) });
+          if (!ruleSet[path](values))
+            failedRules.push({ path, value: JSON.stringify(values) });
         } else {
           values.forEach((value) => {
             if (!ruleSet[path](value)) failedRules.push({ path, value });
@@ -18,10 +19,11 @@ const testObject = (ruleSet, obj) => {
           if (ruleSet[path] !== value) failedRules.push({ path, value });
         });
       }
-    } else {
-      if (typeof ruleSet[path] !== "undefined") {
-        failedRules.push({ path, value: undefined });
-      }
+    } else if (
+      ruleSet[path] !== undefined &&
+      (typeof ruleSet[path] !== "function" || !ruleSet[path](undefined))
+    ) {
+      failedRules.push({ path, value: undefined });
     }
   }
 
