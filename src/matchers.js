@@ -105,6 +105,20 @@ const when = {
       doesntHave["isForArrays"] = true;
       return doesntHave;
     },
+    each: {
+      has: (comparisonValue) => {
+        function has(input) {
+          for (const arr of input) {
+            for (const item of arr) {
+              if (typeof item[comparisonValue] === "undefined") return false;
+            }
+          }
+          return true;
+        }
+        has["isForArrays"] = true;
+        return has;
+      },
+    },
   },
 };
 
