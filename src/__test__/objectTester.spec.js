@@ -1,5 +1,5 @@
 const objectTester = require("../objectTester");
-const when = require("../matchers");
+const { when } = require("../matchers");
 
 describe("objectTester tests", () => {
   const bookStore = {
@@ -66,6 +66,9 @@ describe("objectTester tests", () => {
       {
         "$..color": "red",
         "$..nothing": undefined,
+        "$..nothing2": (a) => {
+          return a === undefined;
+        },
         "$..expensive": "10",
       },
       bookStore
@@ -97,5 +100,26 @@ describe("objectTester tests", () => {
 
     expect(failedRules.length).toBe(1);
     expect(failedRules[0].path).toEqual("$..title");
+  });
+
+  it("should check if each item has a property", () => {
+    const failedRules = objectTester(
+      {
+        "$..book": when.array.each.has("isbn"),
+      },
+      bookStore
+    );
+
+    expect(failedRules.length).toBe(1);
+    expect(failedRules[0].path).toEqual("$..book");
+
+    const failedRules2 = objectTester(
+      {
+        "$..book": when.array.each.has("title"),
+      },
+      bookStore
+    );
+
+    expect(failedRules2.length).toBe(0);
   });
 });
