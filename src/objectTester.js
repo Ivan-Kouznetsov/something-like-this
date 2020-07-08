@@ -7,8 +7,9 @@ const testObject = (ruleSet, obj) => {
     if (values.length > 0) {
       if (typeof ruleSet[path] === "function") {
         if (ruleSet[path].isForArrays) {
-          if (!ruleSet[path](values))
+          if (!ruleSet[path](values)) {
             failedRules.push({ path, value: JSON.stringify(values) });
+          }
         } else {
           values.forEach((value) => {
             if (!ruleSet[path](value)) failedRules.push({ path, value });
