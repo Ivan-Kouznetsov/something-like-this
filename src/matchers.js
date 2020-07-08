@@ -92,29 +92,35 @@ const when = {
   },
   array: {
     has: (comparisonValue) => {
-      function has(input) {
+      const has = (input) => {
         return input.indexOf(comparisonValue) !== -1;
-      }
+      };
       has["isForArrays"] = true;
       return has;
     },
     doesntHave: (comparisonValue) => {
-      function doesntHave(input) {
+      const doesntHave = (input) => {
         return input.indexOf(comparisonValue) === -1;
-      }
+      };
       doesntHave["isForArrays"] = true;
       return doesntHave;
     },
     each: {
-      has: (comparisonValue) => {
-        function has(input) {
+      has: (propToCheck) => {
+        const has = (input) => {
           for (const arr of input) {
             for (const item of arr) {
-              if (typeof item[comparisonValue] === "undefined") return false;
+              if (Array.isArray(propToCheck)) {
+                for (const property of propToCheck) {
+                  if (typeof item[property] === "undefined") return false;
+                }
+              } else {
+                if (typeof item[propToCheck] === "undefined") return false;
+              }
             }
           }
           return true;
-        }
+        };
         has["isForArrays"] = true;
         return has;
       },

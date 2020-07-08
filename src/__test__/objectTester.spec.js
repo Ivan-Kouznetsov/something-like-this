@@ -122,4 +122,25 @@ describe("objectTester tests", () => {
 
     expect(failedRules2.length).toBe(0);
   });
+
+  it("should check if each item has a list of properties", () => {
+    const failedRules = objectTester(
+      {
+        "$..book": when.array.each.has(["title", "isbn"]),
+      },
+      bookStore
+    );
+
+    expect(failedRules.length).toBe(1);
+    expect(failedRules[0].path).toEqual("$..book");
+
+    const failedRules2 = objectTester(
+      {
+        "$..book": when.array.each.has(["title", "author"]),
+      },
+      bookStore
+    );
+
+    expect(failedRules2.length).toBe(0);
+  });
 });
