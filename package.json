@@ -15,7 +15,8 @@
   "dependencies": {
     "jsonpath": "^1.0.2",
     "mariadb": "^2.4.1",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "yargs": "^15.4.0"
   },
   "scripts": {
     "test-server": "node src/__test__/server/testServer.js",
