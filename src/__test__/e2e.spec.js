@@ -15,6 +15,26 @@ describe("End to end tests", () => {
     expect(result.isMatch).toBe(true);
   });
 
+  it("should time requests", async () => {
+    const result = await expectRequest(`${testServer}/posts/0`).toMatch({
+      "$..text": when.each.is.string,
+      "$..id": when.each.is.greaterThanOrEqual(0),
+    });
+
+    expect(result.isMatch).toBe(true);
+    expect(result.duration).toBeGreaterThan(0);
+    expect(result.timing.startOfRequest1).toBeGreaterThan(0);
+    expect(result.timing.startOfRequest2).toBeGreaterThan(
+      result.timing.startOfRequest1
+    );
+    expect(result.timing.startOfCheck).toBeGreaterThan(
+      result.timing.startOfRequest2
+    );
+    expect(result.timing.endOfCheck).toBeGreaterThan(
+      result.timing.startOfCheck
+    );
+  });
+
   it("should fetch and match a post after posting", async () => {
     const result = await after(`${testServer}/posts`, {
       method: "POST",
