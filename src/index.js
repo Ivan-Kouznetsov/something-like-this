@@ -23,7 +23,7 @@ const expectFactory = (arragePromise, pass) => {
         if (arragePromise) {
           const firstResponse = await (await arragePromise).json();
           if (pass) {
-            const passedOnValue = jsonpath.query(firstResponse, pass.passOn)[0];
+            const passedOnValue = jsonpath.value(firstResponse, pass.passOn);
             url = url.replace(pass.as, passedOnValue);
 
             if (options && typeof options.body === "string") {

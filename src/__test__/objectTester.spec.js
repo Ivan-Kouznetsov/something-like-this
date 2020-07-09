@@ -67,7 +67,7 @@ describe("objectTester tests", () => {
         "$..color": "red",
         "$..nothing": undefined,
         "$..nothing2": (a) => {
-          return a === undefined;
+          return { isMatch: a === undefined };
         },
         "$..expensive": "10",
       },
