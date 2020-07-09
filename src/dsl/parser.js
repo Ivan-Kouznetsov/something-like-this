@@ -97,7 +97,7 @@ const keywords = {
   requestUrl: "url:",
   requestBody: "body:",
   requestHeaders: "headers:",
-  passOn: "Pass on",
+  requestPassOn: "Pass on",
 };
 
 const modes = {
@@ -107,7 +107,6 @@ const modes = {
 };
 const parseError = (err) => {
   console.log(err);
-  //exit(1);
 };
 
 const preProcess = (text) => {
@@ -117,39 +116,41 @@ const preProcess = (text) => {
 const textAfterKeyword = (orig, keyword) => {
   const regex = new RegExp(`(?<=${keyword}\s{0,}).+`);
   const result = regex.exec(orig);
-  return result[0];
+  return result[0].trim();
+};
+
+const tryParse = (str) => {
+  try {
+    return JSON.parse(str);
+  } catch {
+    return str;
+  }
 };
 
 const parseRule = (line) => {
   const path = /"\$\S*":/.exec(line)[0];
   const value = /(?<="\$\S*":).+$/.exec(line)[0].trim();
+  const pathWithoutQuotes = path.substring(1, path.length - 2);
 
   for (const matcher of matchers) {
     for (const alias of matcher.aliases) {
       if (value.startsWith(alias)) {
-        return { path, matcher, arg: value.replace(alias, "") };
+        return {
+          path: pathWithoutQuotes,
+          matcher,
+          arg: tryParse(value.replace(alias, "")),
+        };
       }
     }
   }
 
-  return { path, matcher: value };
+  return { path: pathWithoutQuotes, matcher: tryParse(value) };
 };
 
-const parser = (text) => {
-  const lines = preProcess(text).split("\n");
-  const tests = {}; // [{ requests: [], ruleSet: [] }];
-  const emptyRequest = {
-    headers: [],
-    method: "",
-    url: "",
-    body: "",
-    passOn: { passOn: undefined, as: undefined },
-  };
-
-  const current = {
+const newCurrent = () => {
+  return {
     mode: "",
     testName: "",
-    line: "",
     request: {
       headers: [],
       method: "",
@@ -159,23 +160,43 @@ const parser = (text) => {
     },
     ruleSet: [],
   };
+};
+
+const newRequest = () => {
+  return {
+    headers: [],
+    method: "",
+    url: "",
+    body: "",
+    passOn: { passOn: undefined, as: undefined },
+  };
+};
+
+const parser = (text) => {
+  const lines = preProcess(text).split("\n");
+  const tests = {}; // [{ requests: [], ruleSet: [] }];
+
+  let current = newCurrent();
+  let currentLine = "";
 
   for (let i = 0; i < lines.length; i++) {
-    current.line = lines[i];
-    if (current.line.length === 0) {
+    currentLine = lines[i].trim();
+    if (currentLine.length === 0) {
       continue;
-    } else if (current.line.startsWith(keywords.testStart)) {
+    } else if (currentLine.startsWith(keywords.testStart)) {
       if (current.testName) {
         tests[current.testName]["ruleSet"] = [...current.ruleSet];
       }
-      current.ruleSet = [];
+
+      current = newCurrent();
+
       //new test
 
-      current.testName = /(?<=Test that it\s).+$/.exec(current.line)[0];
+      current.testName = /(?<=Test that it\s).+$/.exec(currentLine)[0];
       tests[current.testName] = {};
     } else if (
-      current.line === keywords.after ||
-      current.line === keywords.expect
+      currentLine === keywords.after ||
+      currentLine === keywords.expect
     ) {
       current.mode = modes.request;
 
@@ -184,26 +205,27 @@ const parser = (text) => {
         if (!tests[current.testName].requests) {
           tests[current.testName].requests = [];
         }
-        tests[current.testName].requests.push({ ...current.request });
-        current.request = { ...emptyRequest };
+        tests[current.testName].requests.push(current.request);
+        current.request = newRequest();
       }
-    } else if (current.line === keywords.toMatch) {
+    } else if (currentLine === keywords.toMatch) {
       current.mode = modes.rules;
       if (!tests[current.testName].requests) {
         tests[current.testName].requests = [];
       }
-      tests[current.testName].requests.push({ ...current.request });
-      current.request = { ...emptyRequest };
-    } else if (current.line === keywords.headers) {
+      tests[current.testName].requests.push(current.request);
+      current.request = newRequest;
+    } else if (currentLine === keywords.requestHeaders) {
       current.mode = modes.headers;
-    } else if (current.line.startsWith(keywords.passOn)) {
-      if (current.mode !== modes.request) {
+    } else if (currentLine.startsWith(keywords.requestPassOn)) {
+      if (current.mode !== modes.request && current.mode !== modes.headers) {
         parseError(
-          `${i}: Pass on must be in the After HTTP Request block: ${current.line}`
+          `${i}: Pass on must be in the After HTTP Request block: ${currentLine}`
         );
       } else {
-        const passOnArg = /".*"/.exec(current.line)[0];
-        tests[current.testName].passOn = {
+        const passOnArg = /".*"/.exec(currentLine)[0];
+
+        current.request.passOn = {
           passOn: passOnArg.replace(/"/g, ""),
           as: passOnArg,
         };
@@ -212,31 +234,49 @@ const parser = (text) => {
       // not a mode-setting line
       switch (current.mode) {
         case modes.request:
-          if (current.line.startsWith(keywords.requestMethod)) {
+          if (currentLine.startsWith(keywords.requestMethod)) {
             try {
               current.request.method = textAfterKeyword(
-                current.line,
-                keywords.method
+                currentLine,
+                keywords.requestMethod
               );
             } catch (ex) {
-              parseError(`${i}: empty method: ${current.line}`);
+              parseError(`${i}: empty method: ${currentLine}`);
+            }
+          } else if (currentLine.startsWith(keywords.requestUrl)) {
+            try {
+              current.request.url = textAfterKeyword(
+                currentLine,
+                keywords.requestUrl
+              );
+            } catch (ex) {
+              parseError(`${i}: empty url: ${currentLine}`);
+            }
+          } else if (currentLine.startsWith(keywords.requestBody)) {
+            try {
+              current.request.body = textAfterKeyword(
+                currentLine,
+                keywords.requestBody
+              );
+            } catch (ex) {
+              parseError(`${i}: empty body: ${currentLine}`);
             }
           }
           break;
         case modes.headers:
           try {
             current.request.headers.push(
-              JSON.parse("{" + current.line.trim() + "}")
+              JSON.parse("{" + currentLine.trim() + "}")
             );
           } catch (ex) {
-            parseError(`${i}: invalid header: ${current.line}`);
+            parseError(`${i}: invalid header: ${currentLine}`);
           }
           break;
         case modes.rules:
           try {
-            current.ruleSet.push(parseRule(current.line));
+            current.ruleSet.push(parseRule(currentLine));
           } catch (ex) {
-            parseError(`${i}: invalid rule: ${current.line}`);
+            parseError(`${i}: invalid rule: ${currentLine}`);
           }
           break;
       }
