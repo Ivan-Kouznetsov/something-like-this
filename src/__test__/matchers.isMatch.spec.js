@@ -76,9 +76,7 @@ describe("Matchers tests", () => {
     expect(when.each.is.nonEmptyString("hello").isMatch).toBe(true);
     expect(when.each.is.nonEmptyString("").isMatch).toBe(false);
     expect(when.each.is.nonEmptyString(null).isMatch).toBe(false);
-    expect(when.each.is.stringContaining("hello")("hello world").isMatch).toBe(
-      true
-    );
+    expect(when.each.is.stringContaining("hello")("hello world").isMatch).toBe(true);
   });
 
   it("should correctly match using not", () => {

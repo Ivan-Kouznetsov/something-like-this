@@ -83,9 +83,9 @@ const matchers = [
     isFactory: true,
     aliases: ["matches regex "],
   },
-  { callback: when.array.has, isFactory: true, aliases: ["at least one is "] },
-  { callback: when.array.doesntHave, isFactory: true, aliases: ["none are "] },
-  { callback: when.array.each.has, isFactory: true, aliases: ["each has "] },
+  { callback: when.array.has, isFactory: true, aliases: ["at least one is"] },
+  { callback: when.array.doesntHave, isFactory: true, aliases: ["none are"] },
+  { callback: when.array.each.has, isFactory: true, aliases: ["each has"] },
 ];
 
 const keywords = {
@@ -100,14 +100,14 @@ const keywords = {
   requestPassOn: "Pass on",
 };
 
-const modes = {
+const contexts = {
   request: "request",
   headers: "headers",
   rules: "rules",
 };
 
 const preProcess = (text) => {
-  return text.replace(/^\s*/gm, "");
+  return text.replace(/^\s*/gm, "").replace(/\/**.+**\//gm, "");
 };
 
 const textAfterKeyword = (orig, keyword) => {
@@ -146,14 +146,14 @@ const parseRule = (line) => {
 
 const newCurrent = () => {
   return {
-    mode: "",
+    context: "",
     testName: "",
     request: {
       headers: [],
       method: "",
       url: "",
       body: "",
-      passOn: { passOn: undefined, as: undefined },
+      passOn: [],
     },
     ruleSet: [],
   };
@@ -165,9 +165,11 @@ const newRequest = () => {
     method: "",
     url: "",
     body: "",
-    passOn: { passOn: undefined, as: undefined },
+    passOn: [],
   };
 };
+
+const stripQuotes = (str) => str.replace(/"/g, "");
 
 const parser = (text, onError) => {
   const lines = preProcess(text).split("\n");
@@ -193,7 +195,7 @@ const parser = (text, onError) => {
       currentLine === keywords.after ||
       currentLine === keywords.expect
     ) {
-      current.mode = modes.request;
+      current.context = contexts.request;
 
       if (current.request.url) {
         // add request
@@ -201,31 +203,40 @@ const parser = (text, onError) => {
         current.request = newRequest();
       }
     } else if (currentLine === keywords.toMatch) {
-      current.mode = modes.rules;
+      current.context = contexts.rules;
       if (!tests[current.testName].requests) {
         tests[current.testName].requests = [];
       }
       tests[current.testName].requests.push(current.request);
       current.request = newRequest;
     } else if (currentLine === keywords.requestHeaders) {
-      current.mode = modes.headers;
+      current.context = contexts.headers;
     } else if (currentLine.startsWith(keywords.requestPassOn)) {
-      if (current.mode !== modes.request && current.mode !== modes.headers) {
+      if (
+        current.context !== contexts.request &&
+        current.context !== contexts.headers
+      ) {
         onError(
           `${i}: Pass on must be in the After HTTP Request block: ${currentLine}`
         );
       } else {
-        const passOnArg = /".*"/.exec(currentLine)[0];
-
-        current.request.passOn = {
-          passOn: passOnArg.replace(/"/g, ""),
-          as: passOnArg,
-        };
+        try {
+          const passOnArg = /".*"/.exec(currentLine)[0];
+          const passOnAs = /(?<=\s{1,}as\s{1,}).+$/.exec(currentLine)[0];
+          current.request.passOn.push({
+            jsonpath: stripQuotes(passOnArg),
+            as: passOnAs.trim(),
+          });
+        } catch (ex) {
+          onError(
+            `${i}: Invalid Pass on, should be Pass on "$..id" as _whatever`
+          );
+        }
       }
     } else {
       // not a mode-setting line
-      switch (current.mode) {
-        case modes.request:
+      switch (current.context) {
+        case contexts.request:
           if (currentLine.startsWith(keywords.requestMethod)) {
             try {
               current.request.method = textAfterKeyword(
@@ -255,16 +266,19 @@ const parser = (text, onError) => {
             }
           }
           break;
-        case modes.headers:
+        case contexts.headers:
           try {
-            current.request.headers.push(
-              JSON.parse("{" + currentLine.trim() + "}")
-            );
+            const headerHalves = currentLine.trim().split(":");
+            const header = {};
+            header[stripQuotes(headerHalves[0])] = stripQuotes(
+              headerHalves[1]
+            ).trim();
+            current.request.headers.push(header);
           } catch (ex) {
             onError(`${i}: invalid header: ${currentLine}`);
           }
           break;
-        case modes.rules:
+        case contexts.rules:
           try {
             current.ruleSet.push(parseRule(currentLine));
           } catch (ex) {
