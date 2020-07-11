@@ -54,11 +54,7 @@ const matchers = [
   {
     callback: when.each.is.nonEmptyString,
     isFactory: false,
-    aliases: [
-      "each is a non-empty string",
-      "each is a nonempty string",
-      "each is a non empty string",
-    ],
+    aliases: ["each is a non-empty string", "each is a nonempty string", "each is a non empty string"],
   },
   {
     callback: when.each.is.greaterThan,
@@ -191,10 +187,7 @@ const parser = (text, onError) => {
 
       current.testName = /(?<=Test that it\s).+$/.exec(currentLine)[0];
       tests[current.testName] = {};
-    } else if (
-      currentLine === keywords.after ||
-      currentLine === keywords.expect
-    ) {
+    } else if (currentLine === keywords.after || currentLine === keywords.expect) {
       current.context = contexts.request;
 
       if (current.request.url) {
@@ -212,13 +205,8 @@ const parser = (text, onError) => {
     } else if (currentLine === keywords.requestHeaders) {
       current.context = contexts.headers;
     } else if (currentLine.startsWith(keywords.requestPassOn)) {
-      if (
-        current.context !== contexts.request &&
-        current.context !== contexts.headers
-      ) {
-        onError(
-          `${i}: Pass on must be in the After HTTP Request block: ${currentLine}`
-        );
+      if (current.context !== contexts.request && current.context !== contexts.headers) {
+        onError(`${i}: Pass on must be in the After HTTP Request block: ${currentLine}`);
       } else {
         try {
           const passOnArg = /".*"/.exec(currentLine)[0];
@@ -228,9 +216,7 @@ const parser = (text, onError) => {
             as: passOnAs.trim(),
           });
         } catch (ex) {
-          onError(
-            `${i}: Invalid Pass on, should be Pass on "$..id" as _whatever`
-          );
+          onError(`${i}: Invalid Pass on, should be Pass on "$..id" as _whatever`);
         }
       }
     } else {
@@ -239,28 +225,19 @@ const parser = (text, onError) => {
         case contexts.request:
           if (currentLine.startsWith(keywords.requestMethod)) {
             try {
-              current.request.method = textAfterKeyword(
-                currentLine,
-                keywords.requestMethod
-              );
+              current.request.method = textAfterKeyword(currentLine, keywords.requestMethod);
             } catch (ex) {
               onError(`${i}: empty method: ${currentLine}`);
             }
           } else if (currentLine.startsWith(keywords.requestUrl)) {
             try {
-              current.request.url = textAfterKeyword(
-                currentLine,
-                keywords.requestUrl
-              );
+              current.request.url = textAfterKeyword(currentLine, keywords.requestUrl);
             } catch (ex) {
               onError(`${i}: empty url: ${currentLine}`);
             }
           } else if (currentLine.startsWith(keywords.requestBody)) {
             try {
-              current.request.body = textAfterKeyword(
-                currentLine,
-                keywords.requestBody
-              );
+              current.request.body = textAfterKeyword(currentLine, keywords.requestBody);
             } catch (ex) {
               onError(`${i}: empty body: ${currentLine}`);
             }
@@ -270,9 +247,7 @@ const parser = (text, onError) => {
           try {
             const headerHalves = currentLine.trim().split(":");
             const header = {};
-            header[stripQuotes(headerHalves[0])] = stripQuotes(
-              headerHalves[1]
-            ).trim();
+            header[stripQuotes(headerHalves[0])] = stripQuotes(headerHalves[1]).trim();
             current.request.headers.push(header);
           } catch (ex) {
             onError(`${i}: invalid header: ${currentLine}`);
