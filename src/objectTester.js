@@ -1,41 +1,49 @@
+"strict mode";
 const jsonpath = require("jsonpath");
+/**
+ *  return {
+          path: pathWithoutQuotes,
+          matcher,
+          isArrayMatcher: false,Where 
+        };
+ */
 
-const testObject = (ruleSet, obj) => {
-  let failedRules = [];
-  for (const path in ruleSet) {
-    const values = jsonpath.query(obj, path);
-    if (values.length > 0) {
-      if (typeof ruleSet[path] === "function") {
-        if (ruleSet[path].isForArrays) {
-          const ruleMatchResult = ruleSet[path](values);
-          if (!ruleMatchResult.isMatch) {
-            failedRules.push({
-              path,
-              message: ruleMatchResult.message,
-              value: JSON.stringify(values),
-            });
-          }
-        } else {
-          values.forEach((value) => {
-            const ruleMatchResult = ruleSet[path](value);
-            if (!ruleMatchResult.isMatch)
-              failedRules.push({
-                path,
-                message: ruleMatchResult.message,
-                value,
-              });
-          });
+const makeSimpleArray = (arr) => {
+  if (!Array.isArray(arr)) return [arr];
+  if (arr.length === 1) return makeSimpleArray(arr[0]);
+  return arr;
+};
+
+/**
+ *
+ * @param {[{path:string, matcher: function, isArrayMatcher:boolean }]} jsonRuleSet
+ * @param {object} obj
+ */
+const testObject = (jsonRuleSet, obj) => {
+  const failedRules = [];
+  for (const rule of jsonRuleSet) {
+    const values = jsonpath.query(obj, rule.path);
+    if (typeof rule.matcher === "function") {
+      if (rule.isArrayMatcher) {
+        const check = rule.matcher(makeSimpleArray(values));
+        if (!check.isMatch) {
+          failedRules.push({ path: rule.path, message: check.noMatchMessage });
         }
       } else {
-        values.forEach((value) => {
-          if (ruleSet[path] !== value) failedRules.push({ path, value });
-        });
+        for (const value of values) {
+          const check = rule.matcher(value);
+          if (!check.isMatch) {
+            failedRules.push({ path: rule.path, message: check.noMatchMessage });
+          }
+        }
       }
-    } else if (
-      ruleSet[path] !== undefined &&
-      (typeof ruleSet[path] !== "function" || !ruleSet[path](undefined).isMatch)
-    ) {
-      failedRules.push({ path, message: "Not found", value: undefined });
+    } else if (values.length !== 1 || values[0] !== rule.matcher) {
+      failedRules.push({
+        path: rule.path,
+        message: `Expected ${typeof rule.matcher} ${rule.matcher}, got ${typeof values[0]}:  ${
+          values.length === 1 ? values[0] : "s " + values
+        }`,
+      });
     }
   }
 

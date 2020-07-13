@@ -58,25 +58,3 @@ const expectFactory = (arragePromise, pass) => {
 
   return expect;
 };
-
-const expect = expectFactory(undefined, undefined);
-
-const something_like_this = {
-  /**
-   * @param url {string}
-   * @param [options] {{method: string, body?: string}} Eg GET or POST
-   * @param [pass] {{passOn: string, as: string}}
-   */
-
-  after: (url, options, pass) => {
-    return {
-      expect: expectFactory(fetch(url, options), pass),
-    };
-  },
-
-  expect,
-  when: matchers.when,
-  ifExists: matchers.ifExists,
-};
-
-module.exports = something_like_this;

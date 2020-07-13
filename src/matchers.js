@@ -57,16 +57,6 @@ const matchersForPrimitives = {
       comparisonValue
     )}`,
   }),
-  defined: (comparisonValue) => ({
-    isMatch: typeof comparisonValue !== "undefined",
-    noMatchMessage: `Expected ${showValue(comparisonValue)} to be *defined*, but it was *undefined*`,
-  }),
-  undefined: (comparisonValue) => ({
-    isMatch: typeof comparisonValue === "undefined",
-    noMatchMessage: `Expected ${showValue(comparisonValue)} to be *undefined*, but it was ${describeType(
-      comparisonValue
-    )}`,
-  }),
   truthy: (comparisonValue) => ({
     isMatch: !!comparisonValue,
     noMatchMessage: `Expected ${showValue(comparisonValue)} to evaluate to *true*`,
@@ -163,31 +153,12 @@ const matcherFactoriesForArrays = {
     isMatch: input.indexOf(comparisonValue) === -1,
     noMatchMessage: `Expected ${showValue(input)} to NOT contain ${showValue(comparisonValue)}`,
   }),
-  eachItemHas: (propToCheck) => (input) => {
-    let isMatch = true;
-    for (const arr of input) {
-      for (const item of arr) {
-        if (Array.isArray(propToCheck)) {
-          for (const property of propToCheck) {
-            if (typeof item[property] === "undefined") {
-              isMatch = false;
-              break;
-            }
-          }
-        } else {
-          if (typeof item[propToCheck] === "undefined") {
-            isMatch = false;
-            break;
-          }
-        }
-      }
-    }
-
-    return {
-      isMatch,
-      noMatchMessage: `Expected each item in ${showValue(input)} to NOT contain ${showValue(propToCheck)}`,
-    };
-  },
+  eachItemHas: (propToCheck) => (input) => ({
+    isMatch: Array.isArray(propToCheck)
+      ? input.every((item) => !propToCheck.some((prop) => typeof item[prop] === "undefined"))
+      : input.every((item) => typeof item[propToCheck] !== "undefined"),
+    noMatchMessage: `Expected each item in ${showValue(input)} to contain ${showValue(propToCheck)}`,
+  }),
 };
 
 module.exports = { matchersForPrimitives, matcherFactoriesForPrimitives, matcherFactoriesForArrays };

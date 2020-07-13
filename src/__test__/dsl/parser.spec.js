@@ -1,4 +1,5 @@
-const { parser, preProcess } = require("../../dsl/parser");
+const { parser } = require("../../dsl/parser");
+const preProcess = require("../../dsl/preProcessor");
 
 describe("Parser tests", () => {
   const superComplete = `
@@ -55,9 +56,9 @@ describe("Parser tests", () => {
           "Accept-Encoding":"*/*"
           "token": _newToken
   To match these rules
-      "$..id": each is a number 
-      "$..title": each is a non empty string
-      "$..num": each is > 10`;
+      "$..id": is a number 
+      "$..title": is a non empty string
+      "$..num": > 10`;
 
   const expectOnlyTest = `Test that it should return stuff when queried
       Expect HTTP request
@@ -66,9 +67,9 @@ describe("Parser tests", () => {
           headers:
               "Accept-Encoding":"*/*"
       To match these rules
-          "$..id": each is a number 
-          "$..title": each is a non empty string
-          "$..num": each is > 10`;
+          "$..id": is a number 
+          "$..title": is a non empty string
+          "$..num": > 10`;
 
   const twoTests = `
   Test that it should return stuff when queried
@@ -78,16 +79,16 @@ describe("Parser tests", () => {
           body: hello 
           headers:
               "Accept-Encoding":"*/*"
-          Pass on "$..id"
+          Pass on "$..id" as _id
       Expect HTTP request
           method: get
-          url: http://example.org/"$..id"
+          url: http://example.org/_id
           headers:
               "Accept-Encoding":"*/*"
       To match these rules
-          "$..id": each is a number 
-          "$..title": each is a non empty string
-          "$..num": each is > 10
+          "$..id": is a number 
+          "$..title": is a non empty string
+          "$..num": > 10
 
      Test that it should return literal values
       After HTTP request 
@@ -96,10 +97,10 @@ describe("Parser tests", () => {
           body: hello 
           headers:
               "Accept-Encoding":"*/*"
-          Pass on "$..id"
+          Pass on "$..id" as _id
       Expect HTTP request
           method: get
-          url: http://example.org/"$..id"
+          url: http://example.org/_id
           headers:
               "Accept-Encoding":"*/*"
       To match these rules
@@ -114,12 +115,10 @@ describe("Parser tests", () => {
   });
 
   it("should parse a test", () => {
-    const tests = parser(oneTest, (err) => {
-      console.log(err);
-    });
+    const tests = parser(oneTest, (err) => {});
 
     const name = "should return stuff when queried";
-    console.log(JSON.stringify(tests));
+
     expect(tests).toBeDefined();
     expect(tests[name]).toBeDefined();
     expect(tests[name].requests.length).toEqual(2);
@@ -152,13 +151,9 @@ describe("Parser tests", () => {
     expect(tests[name].ruleSet[1].path).toEqual("$..title");
     expect(tests[name].ruleSet[2].path).toEqual("$..num");
 
-    expect(typeof tests[name].ruleSet[0].matcher.callback).toEqual("function");
-    expect(typeof tests[name].ruleSet[1].matcher.callback).toEqual("function");
-    expect(typeof tests[name].ruleSet[2].matcher.callback).toEqual("function");
-
-    expect(tests[name].ruleSet[0].arg).toEqual("");
-    expect(tests[name].ruleSet[1].arg).toEqual("");
-    expect(tests[name].ruleSet[2].arg).toEqual(10);
+    expect(typeof tests[name].ruleSet[0].matcher).toEqual("function");
+    expect(typeof tests[name].ruleSet[1].matcher).toEqual("function");
+    expect(typeof tests[name].ruleSet[2].matcher).toEqual("function");
   });
 
   it("should parse an expect-only test", () => {
@@ -182,13 +177,9 @@ describe("Parser tests", () => {
     expect(tests[name].ruleSet[1].path).toEqual("$..title");
     expect(tests[name].ruleSet[2].path).toEqual("$..num");
 
-    expect(typeof tests[name].ruleSet[0].matcher.callback).toEqual("function");
-    expect(typeof tests[name].ruleSet[1].matcher.callback).toEqual("function");
-    expect(typeof tests[name].ruleSet[2].matcher.callback).toEqual("function");
-
-    expect(tests[name].ruleSet[0].arg).toEqual("");
-    expect(tests[name].ruleSet[1].arg).toEqual("");
-    expect(tests[name].ruleSet[2].arg).toEqual(10);
+    expect(typeof tests[name].ruleSet[0].matcher).toEqual("function");
+    expect(typeof tests[name].ruleSet[1].matcher).toEqual("function");
+    expect(typeof tests[name].ruleSet[2].matcher).toEqual("function");
   });
 
   it("should parse two tests", () => {
@@ -212,11 +203,11 @@ describe("Parser tests", () => {
       "Accept-Encoding": "*/*",
     });
 
-    expect(tests[name].requests[0].passOn.passOn).toEqual("$..id");
-    expect(tests[name].requests[0].passOn.as).toEqual('"$..id"');
+    expect(tests[name].requests[0].passOn[0].jsonpath).toEqual("$..id");
+    expect(tests[name].requests[0].passOn[0].as).toEqual("_id");
 
     expect(tests[name].requests[1].method).toEqual("get");
-    expect(tests[name].requests[1].url).toEqual('http://example.org/"$..id"');
+    expect(tests[name].requests[1].url).toEqual("http://example.org/_id");
     expect(tests[name].requests[1].body).toEqual("");
     expect(tests[name].requests[1].headers.length).toEqual(1);
     expect(tests[name].requests[1].headers[0]).toEqual({
@@ -228,13 +219,9 @@ describe("Parser tests", () => {
     expect(tests[name].ruleSet[1].path).toEqual("$..title");
     expect(tests[name].ruleSet[2].path).toEqual("$..num");
 
-    expect(typeof tests[name].ruleSet[0].matcher.callback).toEqual("function");
-    expect(typeof tests[name].ruleSet[1].matcher.callback).toEqual("function");
-    expect(typeof tests[name].ruleSet[2].matcher.callback).toEqual("function");
-
-    expect(tests[name].ruleSet[0].arg).toEqual("");
-    expect(tests[name].ruleSet[1].arg).toEqual("");
-    expect(tests[name].ruleSet[2].arg).toEqual(10);
+    expect(typeof tests[name].ruleSet[0].matcher).toEqual("function");
+    expect(typeof tests[name].ruleSet[1].matcher).toEqual("function");
+    expect(typeof tests[name].ruleSet[2].matcher).toEqual("function");
 
     // test 2
 
@@ -248,11 +235,11 @@ describe("Parser tests", () => {
       "Accept-Encoding": "*/*",
     });
 
-    expect(tests[name2].requests[0].passOn.passOn).toEqual("$..id");
-    expect(tests[name2].requests[0].passOn.as).toEqual('"$..id"');
+    expect(tests[name2].requests[0].passOn[0].jsonpath).toEqual("$..id");
+    expect(tests[name2].requests[0].passOn[0].as).toEqual("_id");
 
     expect(tests[name2].requests[1].method).toEqual("get");
-    expect(tests[name2].requests[1].url).toEqual('http://example.org/"$..id"');
+    expect(tests[name2].requests[1].url).toEqual("http://example.org/_id");
     expect(tests[name2].requests[1].body).toEqual("");
     expect(tests[name2].requests[1].headers.length).toEqual(1);
     expect(tests[name2].requests[1].headers[0]).toEqual({
@@ -267,10 +254,6 @@ describe("Parser tests", () => {
     expect(tests[name2].ruleSet[0].matcher).toEqual(1);
     expect(tests[name2].ruleSet[1].matcher).toEqual("title");
     expect(tests[name2].ruleSet[2].matcher).toEqual(300);
-
-    expect(tests[name2].ruleSet[0].arg).toBeUndefined();
-    expect(tests[name2].ruleSet[1].arg).toBeUndefined();
-    expect(tests[name2].ruleSet[2].arg).toBeUndefined();
 
     expect(errorCount).toBe(0);
   });
@@ -296,7 +279,7 @@ describe("Parser tests", () => {
         "$..title": each is a non empty string
         "$..num": each is > 10`;
     let errorCount = 0;
-    const tests = parser(invalidTest, (s) => {
+    parser(invalidTest, (s) => {
       errorCount++;
     });
 

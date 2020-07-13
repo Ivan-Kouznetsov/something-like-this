@@ -30,14 +30,10 @@ describe("Matchers tests", () => {
 
   it("should match correct types", () => {
     expect(matchers.matchersForPrimitives.boolean(false).isMatch).toBe(true);
-    expect(matchers.matchersForPrimitives.defined(1).isMatch).toBe(true);
-    expect(matchers.matchersForPrimitives.undefined().isMatch).toBe(true);
     expect(matchers.matchersForPrimitives.object({}).isMatch).toBe(true);
     expect(matchers.matchersForPrimitives.string("").isMatch).toBe(true);
 
     expect(matchers.matchersForPrimitives.boolean("false").isMatch).toBe(false);
-    expect(matchers.matchersForPrimitives.defined().isMatch).toBe(false);
-    expect(matchers.matchersForPrimitives.undefined(1).isMatch).toBe(false);
     expect(matchers.matchersForPrimitives.object("{}").isMatch).toBe(false);
     expect(matchers.matchersForPrimitives.string(1).isMatch).toBe(false);
   });

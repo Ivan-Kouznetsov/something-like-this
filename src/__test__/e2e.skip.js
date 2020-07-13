@@ -1,4 +1,4 @@
-const { after, expect: expectRequest, when } = require("../index");
+const matchers = require("../matchers");
 
 const port = 3000;
 const testServer = `http://localhost:${port}`;
@@ -24,15 +24,9 @@ describe("End to end tests", () => {
     expect(result.isMatch).toBe(true);
     expect(result.duration).toBeGreaterThan(0);
     expect(result.timing.startOfRequest1).toBeGreaterThan(0);
-    expect(result.timing.startOfRequest2).toBeGreaterThan(
-      result.timing.startOfRequest1
-    );
-    expect(result.timing.startOfCheck).toBeGreaterThan(
-      result.timing.startOfRequest2
-    );
-    expect(result.timing.endOfCheck).toBeGreaterThan(
-      result.timing.startOfCheck
-    );
+    expect(result.timing.startOfRequest2).toBeGreaterThan(result.timing.startOfRequest1);
+    expect(result.timing.startOfCheck).toBeGreaterThan(result.timing.startOfRequest2);
+    expect(result.timing.endOfCheck).toBeGreaterThan(result.timing.startOfCheck);
   });
 
   it("should fetch and match a post after posting", async () => {

@@ -1,88 +1,5 @@
-const { when } = require("../index");
-
-const matchers = [
-  {
-    callback: when.each.is.number,
-    isFactory: false,
-    aliases: ["each is a number"],
-  },
-  {
-    callback: when.each.is.string,
-    isFactory: false,
-    aliases: ["each is a string"],
-  },
-  {
-    callback: when.each.is.boolean,
-    isFactory: false,
-    aliases: ["each is a boolean", "each is a bool", "each is true or false"],
-  },
-  {
-    callback: when.each.is.object,
-    isFactory: false,
-    aliases: ["each is an object"],
-  },
-  {
-    callback: when.each.is.array,
-    isFactory: false,
-    aliases: ["each is an array"],
-  },
-  {
-    callback: when.each.is.defined,
-    isFactory: false,
-    aliases: ["each is defined"],
-  },
-  {
-    callback: when.each.is.undefined,
-    isFactory: false,
-    aliases: ["each is undefined"],
-  },
-  {
-    callback: when.each.is.truthy,
-    isFactory: false,
-    aliases: ["each is truthy", "each is true"],
-  },
-  {
-    callback: when.each.is.falsy,
-    isFactory: false,
-    aliases: ["each is falsy", "each is false"],
-  },
-  {
-    callback: when.each.is.stringContaining,
-    isFactory: true,
-    aliases: ["each is a string containing"],
-  },
-  {
-    callback: when.each.is.nonEmptyString,
-    isFactory: false,
-    aliases: ["each is a non-empty string", "each is a nonempty string", "each is a non empty string"],
-  },
-  {
-    callback: when.each.is.greaterThan,
-    isFactory: false,
-    aliases: ["each is >"],
-  },
-  { callback: when.each.is.lessThan, isFactory: false, aliases: ["each is <"] },
-  {
-    callback: when.each.is.greaterThanOrEqual,
-    isFactory: false,
-    aliases: ["each is >="],
-  },
-  {
-    callback: when.each.is.lessThanOrEqual,
-    isFactory: false,
-    aliases: ["each is <="],
-  },
-  { callback: when.each.is.anyOf, isFactory: true, aliases: ["any of"] },
-  { callback: when.each.is.not, isFactory: true, aliases: ["not"] },
-  {
-    callback: when.each.is.matchingRegex,
-    isFactory: true,
-    aliases: ["matches regex "],
-  },
-  { callback: when.array.has, isFactory: true, aliases: ["at least one is"] },
-  { callback: when.array.doesntHave, isFactory: true, aliases: ["none are"] },
-  { callback: when.array.each.has, isFactory: true, aliases: ["each has"] },
-];
+const matcherAliases = require("./matcherAliases");
+const preProcessor = require("./preProcessor");
 
 const keywords = {
   testStart: "Test that it ",
@@ -102,10 +19,6 @@ const contexts = {
   rules: "rules",
 };
 
-const preProcess = (text) => {
-  return text.replace(/^\s*/gm, "").replace(/\/**.+**\//gm, "");
-};
-
 const textAfterKeyword = (orig, keyword) => {
   const regex = new RegExp(`(?<=${keyword}\s{0,}).+`);
   const result = regex.exec(orig);
@@ -116,22 +29,49 @@ const tryParse = (str) => {
   try {
     return JSON.parse(str);
   } catch {
-    return str;
+    return str.trim();
   }
 };
 
-const parseRule = (line) => {
+const parseJsonRule = (line) => {
   const path = /"\$\S*":/.exec(line)[0];
   const value = /(?<="\$\S*":).+$/.exec(line)[0].trim();
   const pathWithoutQuotes = path.substring(1, path.length - 2);
 
-  for (const matcher of matchers) {
-    for (const alias of matcher.aliases) {
+  for (const entry of matcherAliases.matchersForPrimitives) {
+    const sortedAliases = entry.aliases.sort((a, b) => a.length - b.length);
+    for (const alias of sortedAliases) {
       if (value.startsWith(alias)) {
         return {
           path: pathWithoutQuotes,
-          matcher,
-          arg: tryParse(value.replace(alias, "")),
+          matcher: entry.matcher,
+          isArrayMatcher: false,
+        };
+      }
+    }
+  }
+
+  for (const entry of matcherAliases.matcherFactoriesForPrimitives) {
+    const sortedAliases = entry.aliases.sort((a, b) => a.length - b.length);
+    for (const alias of sortedAliases) {
+      if (value.startsWith(alias)) {
+        return {
+          path: pathWithoutQuotes,
+          matcher: entry.matcherFactory(tryParse(value.replace(alias, ""))),
+          isArrayMatcher: false,
+        };
+      }
+    }
+  }
+
+  for (const entry of matcherAliases.matcherFactoriesForArrays) {
+    const sortedAliases = entry.aliases.sort((a, b) => a.length - b.length);
+    for (const alias of sortedAliases) {
+      if (value.startsWith(alias)) {
+        return {
+          path: pathWithoutQuotes,
+          matcher: entry.matcherFactory(tryParse(value.replace(alias, ""))),
+          isArrayMatcher: true,
         };
       }
     }
@@ -168,7 +108,7 @@ const newRequest = () => {
 const stripQuotes = (str) => str.replace(/"/g, "");
 
 const parser = (text, onError) => {
-  const lines = preProcess(text).split("\n");
+  const lines = preProcessor(text);
   const tests = {}; // [{ requests: [], ruleSet: [] }];
 
   let current = newCurrent();
@@ -241,6 +181,8 @@ const parser = (text, onError) => {
             } catch (ex) {
               onError(`${i}: empty body: ${currentLine}`);
             }
+          } else {
+            onError(`${i}: Not valid line: ${currentLine}`);
           }
           break;
         case contexts.headers:
@@ -255,7 +197,7 @@ const parser = (text, onError) => {
           break;
         case contexts.rules:
           try {
-            current.ruleSet.push(parseRule(currentLine));
+            current.ruleSet.push(parseJsonRule(currentLine));
           } catch (ex) {
             onError(`${i}: invalid rule: ${currentLine}`);
           }
@@ -268,4 +210,4 @@ const parser = (text, onError) => {
   return tests;
 };
 
-module.exports = { parser, preProcess };
+module.exports = { parser };
